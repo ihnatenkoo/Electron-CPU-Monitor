@@ -1,5 +1,6 @@
 const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
+const { currentLoad } = require('systeminformation');
 require('electron-reload')(__dirname);
 
 let mainWindow;
@@ -17,6 +18,7 @@ const createWindow = () => {
 		autoHideMenuBar: true,
 		webPreferences: {
 			preload: path.join(__dirname, 'preload.js'),
+			sandbox: false,
 		},
 	});
 
@@ -32,6 +34,12 @@ app.whenReady().then(() => {
 	});
 	ipcMain.on('app:minimize', () => {
 		mainWindow.minimize();
+	});
+
+	ipcMain.handle('get-cpu-info', async () => {
+		const info = await currentLoad();
+		const loadValue = info.currentLoad;
+		return loadValue;
 	});
 });
 
